@@ -1,30 +1,27 @@
 package edu.java.scrapper.domain.jdbc;
 
 import edu.java.scrapper.domain.dto.Chat;
-import edu.java.scrapper.utils.DateParser;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
+@SuppressWarnings("MultipleStringLiterals")
 @Repository
 public class JdbcChatRepository {
 
+    private final ChatRowMapper chatRowMapper;
     public JdbcTemplate jdbcTemplate;
 
-    public JdbcChatRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcChatRepository(JdbcTemplate jdbcTemplate, ChatRowMapper chatRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.chatRowMapper = chatRowMapper;
     }
 
     public List<Chat> findAllChats() {
         String sql = "SELECT * FROM chats";
 
-        return jdbcTemplate.query(sql, (row, item) ->
-            new Chat(
-                row.getLong("id"),
-                row.getLong("chat_id"),
-                DateParser.parseDate(row.getString("addition_time"))
-            ));
+        return jdbcTemplate.query(sql, chatRowMapper);
     }
 
 
@@ -32,12 +29,7 @@ public class JdbcChatRepository {
         String sql = "SELECT * FROM chats WHERE chat_id = ?";
 
         try {
-            return jdbcTemplate.query(sql, (row, item) ->
-                new Chat(
-                    row.getLong("id"),
-                    row.getLong("chat_id"),
-                    DateParser.parseDate(row.getString("addition_time"))
-                ), tgChatId).getFirst();
+            return jdbcTemplate.query(sql, chatRowMapper, tgChatId).getFirst();
         } catch (Exception e) {
             return null;
         }

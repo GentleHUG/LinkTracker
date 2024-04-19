@@ -1,7 +1,6 @@
 package edu.java.scrapper.domain.jdbc;
 
 import edu.java.scrapper.domain.dto.Link;
-import edu.java.scrapper.utils.DateParser;
 import java.util.List;
 import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,24 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class JdbcLinkRepository {
 
-    public JdbcTemplate jdbcTemplate;
+    public final JdbcTemplate jdbcTemplate;
+    public final LinkRowMapper linkRowMapper;
 
-    public JdbcLinkRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcLinkRepository(JdbcTemplate jdbcTemplate, LinkRowMapper linkRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.linkRowMapper = linkRowMapper;
     }
 
     public List<Link> findAll() {
         String sql = "SELECT * FROM links";
 
-        return jdbcTemplate.query(sql, (row, item) ->
-            new Link(
-                row.getLong("id"),
-                row.getString("url"),
-                DateParser.parseDate(row.getString("addition_time")),
-                DateParser.parseDate(row.getString("last_check_time")),
-                row.getLong("answers_count"),
-                row.getLong("commits_count")
-            ));
+        return jdbcTemplate.query(sql, linkRowMapper);
     }
 
     public List<Link> findAllByChatId(Long chatId) {
@@ -39,15 +32,7 @@ public class JdbcLinkRepository {
             JOIN links ON links.id = chats_links.link_id
             WHERE chats_links.chat_id = ?""";
 
-        return jdbcTemplate.query(sql, (row, item) ->
-            new Link(
-                row.getLong("id"),
-                row.getString("url"),
-                DateParser.parseDate(row.getString("addition_time")),
-                DateParser.parseDate(row.getString("last_check_time")),
-                row.getLong("answers_count"),
-                row.getLong("commits_count")
-            ), chatId);
+        return jdbcTemplate.query(sql, linkRowMapper, chatId);
     }
 
     private Long getLinkIdByUrl(String url) {
@@ -64,15 +49,7 @@ public class JdbcLinkRepository {
         String sql = "SELECT * FROM links WHERE url = ?";
 
         try {
-            return jdbcTemplate.queryForObject(sql, (row, item) ->
-                new Link(
-                    row.getLong("id"),
-                    row.getString("url"),
-                    DateParser.parseDate(row.getString("addition_time")),
-                    DateParser.parseDate(row.getString("last_check_time")),
-                    row.getLong("answers_count"),
-                    row.getLong("commits_count")
-                ), url);
+            return jdbcTemplate.queryForObject(sql, linkRowMapper, url);
         } catch (Exception e) {
             return null;
         }
@@ -131,15 +108,7 @@ public class JdbcLinkRepository {
             WHERE EXTRACT(EPOCH FROM (now() - last_check_time)) > ?
             """;
 
-        return jdbcTemplate.query(sql, (row, item) ->
-            new Link(
-                row.getLong("id"),
-                row.getString("url"),
-                DateParser.parseDate(row.getString("addition_time")),
-                DateParser.parseDate(row.getString("last_check_time")),
-                row.getLong("answers_count"),
-                row.getLong("commits_count")
-            ), forceCheckDelay);
+        return jdbcTemplate.query(sql, linkRowMapper, forceCheckDelay);
     }
 
     @Transactional
