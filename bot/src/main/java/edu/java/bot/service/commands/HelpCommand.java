@@ -2,10 +2,13 @@ package edu.java.bot.service.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
+import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class HelpCommand implements Command {
+
     private final List<Command> commands;
 
     public HelpCommand(List<Command> commands) {

@@ -2,9 +2,18 @@ package edu.java.bot.service.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
+import edu.java.bot.client.ScrapperClient;
+import edu.java.bot.controller.dto.AddLinkRequest;
 import edu.java.bot.util.UrlChecker;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TrackCommand implements Command {
+
+    @Autowired
+    private ScrapperClient scrapperClient;
+
     @Override
     public String command() {
         return "/track";
@@ -21,16 +30,16 @@ public class TrackCommand implements Command {
         String messageText = "Введите корректную ссылку";
         String input = update.message().text();
 
-        int spaceIndex = input.indexOf(' ');
-        if (spaceIndex != -1) {
-            String url = input.substring(spaceIndex + 1).trim();
-            if (UrlChecker.isValid(url)) {
+        String[] split = input.split(" ");
 
-                // НУЖНО ДОБАВИТЬ ФУНКЦИОНАЛ
-                messageText = "Ссылка успешно добавлена к отслеживанию: " + url;
+        if (split.length == 2 && UrlChecker.isValid(split[1])) {
+            try {
+                scrapperClient.createLink(update.message().from().id(), new AddLinkRequest(split[1]));
+                messageText = "Ссылка успешно добавлена: \n" + split[1];
+            } catch (Exception e) {
+                messageText = e.getMessage();
             }
         }
-
 
         return new SendMessage(update.message().chat().id(), messageText);
     }

@@ -2,9 +2,18 @@ package edu.java.bot.service.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
+import edu.java.bot.client.ScrapperClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import java.util.ArrayList;
+import java.util.List;
 
+@Component
 public class ListCommand implements Command{
+
+    @Autowired
+    private ScrapperClient scrapperClient;
+
     @Override
     public String command() {
         return "/list";
@@ -18,17 +27,23 @@ public class ListCommand implements Command{
     @Override
     public SendMessage handle(Update update) {
 
-        // Заполнение массива ссылок из БД
-        ArrayList<String> linkList = new ArrayList<>();
-
         StringBuilder messageText = new StringBuilder();
 
-        if (linkList.isEmpty()) {
-            messageText.append("Список отслеживаемых ссылок пуст!");
-        } else {
-            for (int i = 0; i < linkList.size(); i++) {
-                messageText.append(i + 1).append(") ").append(linkList.get(i)).append("\n");
+
+        try {
+            Long tgChatId = update.message().from().id();
+            var listLinks = scrapperClient.getLinks(tgChatId);
+            if (listLinks.size() == 0) {
+                messageText.append("Список отслеживаемых ссылок пуст!");
+            } else {
+                messageText.append("Вот список ссылок!\n");
+                for (int i = 0; i < listLinks.size(); i++) {
+                    messageText.append(i + 1).append(listLinks.links().get(i).link()).append("\n");
+                }
             }
+
+        } catch (Exception e) {
+            messageText.append(e.getMessage());
         }
 
         return new SendMessage(update.message().chat().id(), messageText.toString());

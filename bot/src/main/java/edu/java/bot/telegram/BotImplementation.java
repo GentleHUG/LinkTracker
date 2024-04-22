@@ -13,8 +13,10 @@ import edu.java.bot.configuration.ApplicationConfig;
 import edu.java.bot.service.UserMessageProcessor;
 import java.util.List;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
+@Log4j2
 @Component
 public class BotImplementation implements Bot{
     private final UserMessageProcessor messageProcessor;
@@ -32,7 +34,7 @@ public class BotImplementation implements Bot{
         if (request instanceof SendMessage sendMessageRequest) {
             SendResponse sendResponse = bot.execute(sendMessageRequest);
             if (!sendResponse.isOk()) {
-                // Здесь должно быть логирование
+                log.info(sendResponse.description());
             }
         }
     }
@@ -58,10 +60,11 @@ public class BotImplementation implements Bot{
         bot.setUpdatesListener(updates -> {
             process(updates);
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
-            }, e -> {
+        }, e -> {
             if (e.response() != null) {
-            e.response().errorCode();
-            e.response().description();}
+                e.response().errorCode();
+                e.response().description();
+            }
         });
     }
 

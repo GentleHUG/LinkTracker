@@ -3,7 +3,9 @@ package edu.java.bot.service.commands;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.util.UrlChecker;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UntrackCommand implements Command {
     @Override
     public String command() {

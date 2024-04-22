@@ -8,10 +8,10 @@ import edu.java.bot.service.commands.ListCommand;
 import edu.java.bot.service.commands.StartCommand;
 import edu.java.bot.service.commands.TrackCommand;
 import edu.java.bot.service.commands.UntrackCommand;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +25,8 @@ public class TelegramUserMessageProcessorTest {
         commands.add(new ListCommand());
         commands.add(new TrackCommand());
         commands.add(new UntrackCommand());
-        commands.add(new HelpCommand(commands));
 
+        HelpCommand helpCommand = new HelpCommand(commands);
         messageProcessor = new TelegramUserMessageProcessor(commands);
     }
 
