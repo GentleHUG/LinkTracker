@@ -29,7 +29,7 @@ public class LinkRowMapper implements RowMapper<Link> {
             rs.getString("url"),
             parseDate(rs.getString("addition_time")),
             parseDate(rs.getString("last_check_time")),
-            rs.getLong("answer_count"),
+            rs.getLong("answers_count"),
             rs.getLong("commits_count")
         );
     }

@@ -2,63 +2,90 @@ package edu.java.scrapper.service.jdbc;
 
 import edu.java.scrapper.domain.dto.Chat;
 import edu.java.scrapper.domain.dto.Link;
-import edu.java.scrapper.domain.jdbc.JdbcChatRepository;
-import edu.java.scrapper.domain.jdbc.JdbcLinkRepository;
+import edu.java.scrapper.domain.jdbc.JdbcChatRepositoryNew;
+import edu.java.scrapper.domain.jdbc.JdbcLinkRepositoryNew;
 import edu.java.scrapper.exception.NotFoundChatException;
 import edu.java.scrapper.exception.ExistsLinkException;
 import edu.java.scrapper.exception.NotFoundLinkException;
 import edu.java.scrapper.service.LinkService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.net.URI;
-import java.util.Collection;
+import java.util.List;
 
 @Service
 public class JdbcLinkService implements LinkService {
-    JdbcLinkRepository jdbcLinkRepository;
-    JdbcChatRepository jdbcChatRepository;
+    JdbcLinkRepositoryNew jdbcLinkRepository;
+    JdbcChatRepositoryNew jdbcChatRepository;
 
-    public JdbcLinkService(JdbcLinkRepository jdbcLinkRepository, JdbcChatRepository jdbcChatRepository) {
+    public JdbcLinkService(JdbcLinkRepositoryNew jdbcLinkRepository, JdbcChatRepositoryNew jdbcChatRepository) {
         this.jdbcLinkRepository = jdbcLinkRepository;
         this.jdbcChatRepository = jdbcChatRepository;
     }
 
+    @Transactional
     @Override
     public Link add(long tgChatId, URI url) throws NotFoundChatException, ExistsLinkException {
-        Chat chat = jdbcChatRepository.findChatByTgChatId(tgChatId);
-
-        if (chat == null) {
+        Chat chat;
+        try {
+            chat = jdbcChatRepository.findChatByTgChatId(tgChatId);
+        } catch (Exception e) {
             throw new NotFoundChatException();
+        }
+
+        Link link;
+        try {
+            link = jdbcLinkRepository.findLinkByUrl(url.toString());
+        } catch (Exception e) {
+            jdbcLinkRepository.add(url.toString());
+            link = jdbcLinkRepository.findLinkByUrl(url.toString());
+
         }
 
         try {
-            return jdbcLinkRepository.add(chat.chatId(), url.toString());
+            jdbcLinkRepository.addLinkIdToChatId(link.id(), chat.id());
         } catch (Exception e) {
             throw new ExistsLinkException();
-        }
-    }
-
-    @Override
-    public Link remove(long tgChatId, URI url) throws NotFoundChatException, NotFoundLinkException {
-        Chat chat = jdbcChatRepository.findChatByTgChatId(tgChatId);
-
-        if (chat == null) {
-            throw new NotFoundChatException();
-        }
-
-        Link link = jdbcLinkRepository.remove(chat.chatId(), url.toString());
-
-        if (link == null) {
-            throw new NotFoundLinkException();
         }
         return link;
     }
 
     @Override
-    public Collection<Link> listAll(long tgChatId) throws NotFoundChatException {
-        Chat chat = jdbcChatRepository.findChatByTgChatId(tgChatId);
-        if (chat == null) {
+    public Link remove(long tgChatId, URI url) throws NotFoundChatException, NotFoundLinkException {
+        Chat chat;
+
+        try {
+            chat = jdbcChatRepository.findChatByTgChatId(tgChatId);
+        } catch (Exception e) {
             throw new NotFoundChatException();
         }
-        return jdbcLinkRepository.findAllByChatId(chat.chatId());
+
+        Link link;
+        try {
+            link = jdbcLinkRepository.findLinkByUrl(url.toString());
+        } catch (Exception e) {
+            throw new NotFoundLinkException();
+        }
+
+        if (!jdbcLinkRepository.isLinkConnectedToChat(chat.id(), link.id())) {
+            throw new NotFoundLinkException();
+        }
+
+        jdbcLinkRepository.removeLinkToChat(chat.id(), link.id());
+        if (!jdbcLinkRepository.isLinkConnected(link.id())) {
+            jdbcLinkRepository.removeLink(link.id());
+        }
+
+        return link;
+    }
+
+    @Override
+    public List<Link> listAll(long tgChatId) throws NotFoundChatException {
+        try {
+            Chat chat = jdbcChatRepository.findChatByTgChatId(tgChatId);
+            return jdbcLinkRepository.findAllByChatId(chat.id());
+        } catch (Exception e) {
+            throw new NotFoundChatException();
+        }
     }
 }

@@ -9,12 +9,15 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@Deprecated
 public class JdbcLinkRepository {
 
+    public final JdbcChatRepository chatRepository;
     public final JdbcTemplate jdbcTemplate;
     public final LinkRowMapper linkRowMapper;
 
-    public JdbcLinkRepository(JdbcTemplate jdbcTemplate, LinkRowMapper linkRowMapper) {
+    public JdbcLinkRepository(JdbcChatRepository chatRepository, JdbcTemplate jdbcTemplate, LinkRowMapper linkRowMapper) {
+        this.chatRepository = chatRepository;
         this.jdbcTemplate = jdbcTemplate;
         this.linkRowMapper = linkRowMapper;
     }
@@ -25,7 +28,10 @@ public class JdbcLinkRepository {
         return jdbcTemplate.query(sql, linkRowMapper);
     }
 
-    public List<Link> findAllByChatId(Long chatId) {
+    public List<Link> findAllByChatId(Long tgChatId) {
+
+        Long chatId = chatRepository.findChatByTgChatId(tgChatId).id();
+
         String sql = """
             SELECT links.*
             FROM chats_links
@@ -59,15 +65,14 @@ public class JdbcLinkRepository {
     public Link add(Long chatId, String url) {
         Long linkId = getLinkIdByUrl(url);
 
-        if (linkId == null) {
-            SimpleJdbcInsert insertIntoLink = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("links")
-                .usingGeneratedKeyColumns("id")
-                .usingColumns("url");
-            linkId = insertIntoLink.executeAndReturnKey(Map.of("url", url)).longValue();
-        }
+        String sql;
 
-        String sql = "INSERT INTO chats_links (chat_id, link_id) VALUES (?, ?)";
+        if (linkId == null) {
+            sql = "INSERT INTO links (url) VALUES (?)";
+            jdbcTemplate.update(sql, url);
+            linkId = getLinkIdByUrl(url);
+        }
+        sql = "INSERT INTO chats_links (chat_id, link_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, chatId, linkId);
 
         return getLinkByUrl(url);

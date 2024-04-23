@@ -8,6 +8,7 @@ import java.util.List;
 
 @SuppressWarnings("MultipleStringLiterals")
 @Repository
+@Deprecated
 public class JdbcChatRepository {
 
     private final ChatRowMapper chatRowMapper;
