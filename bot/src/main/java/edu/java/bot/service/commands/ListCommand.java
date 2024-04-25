@@ -38,7 +38,7 @@ public class ListCommand implements Command{
             } else {
                 messageText.append("Вот список ссылок!\n");
                 for (int i = 0; i < listLinks.size(); i++) {
-                    messageText.append(i + 1).append(listLinks.links().get(i).link()).append("\n");
+                    messageText.append(i + 1 + ". ").append(listLinks.links().get(i).link()).append("\n");
                 }
             }
 

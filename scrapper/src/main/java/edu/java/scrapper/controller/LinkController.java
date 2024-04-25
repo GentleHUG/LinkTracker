@@ -30,9 +30,9 @@ public class LinkController {
 	}
 
 	@GetMapping("/links")
-    public ResponseEntity<ListLinkResponse> getLinks(@RequestHeader("Tg-Chat-Id") Long chatId)
+    public ResponseEntity<ListLinkResponse> getLinks(@RequestHeader("Tg-Chat-Id") Long tgChatId)
         throws NotFoundChatException {
-        List<LinkResponse> list = linkService.listAll(chatId).stream()
+        List<LinkResponse> list = linkService.listAll(tgChatId).stream()
             .map(link -> new LinkResponse(link.id(), URI.create(link.url())))
             .toList();
 
@@ -53,11 +53,11 @@ public class LinkController {
 
     @DeleteMapping("/links")
     public ResponseEntity<LinkResponse> removeLink(
-        @RequestHeader("Tg-Chat-Id") Long chatId,
+        @RequestHeader("Tg-Chat-Id") Long tgChatId,
         @RequestBody @Valid RemoveLinkRequest removeLinkRequest
     ) throws NotFoundLinkException, NotFoundChatException {
 
-        Link removedLink = linkService.remove(chatId, URI.create(removeLinkRequest.link()));
+        Link removedLink = linkService.remove(tgChatId, URI.create(removeLinkRequest.link()));
         LinkResponse linkResponse = new LinkResponse(removedLink.id(), URI.create(removedLink.url()));
 
         return new ResponseEntity<>(linkResponse, HttpStatus.OK);

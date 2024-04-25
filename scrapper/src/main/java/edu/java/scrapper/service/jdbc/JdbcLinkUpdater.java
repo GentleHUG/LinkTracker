@@ -2,6 +2,7 @@ package edu.java.scrapper.service.jdbc;
 
 import edu.java.scrapper.domain.dto.Link;
 import edu.java.scrapper.domain.jdbc.JdbcLinkRepository;
+import edu.java.scrapper.domain.jdbc.JdbcLinkRepositoryNew;
 import edu.java.scrapper.service.LinkUpdater;
 import org.springframework.stereotype.Service;
 import java.util.Collection;
@@ -9,9 +10,9 @@ import java.util.List;
 
 @Service
 public class JdbcLinkUpdater implements LinkUpdater {
-    JdbcLinkRepository jdbcLinkRepository;
+    JdbcLinkRepositoryNew jdbcLinkRepository;
 
-    public JdbcLinkUpdater(JdbcLinkRepository jdbcLinkRepository) {
+    public JdbcLinkUpdater(JdbcLinkRepositoryNew jdbcLinkRepository) {
         this.jdbcLinkRepository = jdbcLinkRepository;
     }
 

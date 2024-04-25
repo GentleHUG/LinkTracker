@@ -4,6 +4,6 @@ import java.net.URI;
 
 public record LinkResponse (
     Integer id,
-    URI link
+    String link
 ) {
 }
