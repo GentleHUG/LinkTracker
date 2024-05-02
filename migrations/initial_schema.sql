@@ -1,3 +1,7 @@
+--liquibase formatter sql
+
+--changeset andeygavrilenko:1
+--comment: Create Chats table
 create table chats
 (
     id bigserial primary key,
@@ -5,6 +9,9 @@ create table chats
     addition_time timestamp with time zone default now() not null
 );
 
+
+--changeset andreygavrilenko:2
+--comment: Create Links table
 create table links
 (
     id bigserial primary key,
@@ -15,6 +22,9 @@ create table links
     commits_count bigint default 0 not null
 );
 
+
+--changeset andeygavrelenko:3
+--comment: Crete ChatsLinks linking table
 create table chats_links
 (
     id bigserial primary key,

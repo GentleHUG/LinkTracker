@@ -3,15 +3,11 @@ package edu.java.scrapper.client.dto;
 import java.util.List;
 
 public record GitHubCommitResponse (
-    List<GitHumCommitItem> items
+  String sha,
+  Commit commit
 ){
-    public record GitHumCommitItem(
-        String sha,
-        Commit commit
+    public record Commit (
+       String message
     ) {
-        public record Commit (
-            String message
-        ) {
-        }
     }
 }

@@ -6,7 +6,7 @@ import edu.java.scrapper.client.StackOverflowClient;
 import edu.java.scrapper.client.dto.GitHubCommitResponse;
 import edu.java.scrapper.client.dto.GitHubRepositoryResponse;
 import edu.java.scrapper.client.dto.StackOverflowAnswerResponse;
-import edu.java.scrapper.client.dto.StackOverflowQuestionItem;
+import edu.java.scrapper.client.dto.StackOverflowQuestionResponse;
 import edu.java.scrapper.controller.dto.UpdateRequest;
 import edu.java.scrapper.domain.dto.Link;
 import lombok.extern.log4j.Log4j2;
@@ -69,41 +69,49 @@ public class LinkUpdateScheduler {
         String owner = path[1];
         String repo = path[2];
 
-        GitHubRepositoryResponse repository = gitHubClient.fetchRepository(owner, repo);
-        if (link.lastCheckTime().isBefore(repository.getPushedAt())
-            || link.lastCheckTime().isBefore(repository.getUpdatedAt())) {
+        try {
+            GitHubRepositoryResponse repository = gitHubClient.fetchRepository(owner, repo);
+            if (link.lastCheckTime().isBefore(repository.pushedAt())
+            || link.lastCheckTime().isBefore(repository.updatedAt())) {
+                String description = "(обновление в репозитории)\n";
+                linkUpdater.update(link.id());
 
-            String description = "Обновление в репозитории";
-            linkUpdater.update(link.id());
+                List<GitHubCommitResponse> commits = gitHubClient.fetchCommit(owner, repo);
+                if (commits.size() != link.commitsCount()) {
+                    description += "Новый коммит: " + commits.getFirst().commit().message();
+                }
 
-            GitHubCommitResponse commits = gitHubClient.fetchCommit(owner, repo);
-            if (commits.items().size() != link.commitsCount()) {
-                description += ": новый коммит\n" + commits.items().getFirst().commit().message();
+                List<Long> tgChatIds = linkUpdater.listAllTgChatIdByLinkId(link.id());
+                sendBotUpdates(link, description, tgChatIds);
             }
-
-            List<Long> tgChatIds = linkUpdater.listAllTgChatIdByLinkId(link.id());
-            sendBotUpdates(link, description, tgChatIds);
+        } catch (Exception e) {
+            log.warn(e.getMessage());
         }
     }
 
     private void stackOverflowHandler(Link link, URI url) {
         Long questionId = Long.parseLong(url.getPath().split("/")[2]);
 
-        StackOverflowQuestionItem res = stackOverflowClient.fetchQuestion(questionId).getItems().getFirst();
+        try {
 
-        if (link.lastCheckTime().isBefore(res.getLastActivityDate())) {
-            String description = "Появились обновления по запросу";
-            linkUpdater.update(link.id());
+            StackOverflowQuestionResponse.StackOverflowQuestionItem response =
+                stackOverflowClient.fetchQuestion(questionId).items().getFirst();
+            if (link.lastCheckTime().isBefore(response.lastActivityDate())) {
+                String description = "(новая информация по вопросу)\n";
+                linkUpdater.update(link.id());
 
-            StackOverflowAnswerResponse answer = stackOverflowClient.fetchAnswer(questionId);
-            if (answer.items().size() != link.answerCount()) {
-                description += ": появился новый ответ в " + answer.items().getFirst().creationDate();
+                StackOverflowAnswerResponse answers = stackOverflowClient.fetchAnswer(questionId);
+                if (answers.items().size() != link.answerCount()) {
+                    description += "Появился новый ответ в " + answers.items().getFirst().creationDate();
+                }
+
+                List<Long> tgChatIds = linkUpdater.listAllTgChatIdByLinkId(link.id());
+                sendBotUpdates(link, description, tgChatIds);
             }
 
-            List<Long> tgChatIds = linkUpdater.listAllTgChatIdByLinkId(link.id());
-            sendBotUpdates(link, description, tgChatIds);
+        } catch (Exception e) {
+            log.warn(e.getMessage());
         }
-
     }
 
     private void sendBotUpdates(Link link, String description, List<Long> tgChatIds) {
