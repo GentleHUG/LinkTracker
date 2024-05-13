@@ -1,7 +1,7 @@
 package edu.java.scrapper.controller;
 
 import edu.java.scrapper.controller.dto.ErrorResponse;
-import edu.java.scrapper.exception.ExistsLinkException;
+import edu.java.scrapper.exception.ExistLinkException;
 import edu.java.scrapper.exception.ExistChatException;
 import edu.java.scrapper.exception.NotFoundChatException;
 import edu.java.scrapper.exception.NotFoundLinkException;
@@ -23,7 +23,7 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ExistsLinkException.class)
+    @ExceptionHandler(ExistLinkException.class)
     public ResponseEntity<ErrorResponse> existLinkHandler(Exception ex) {
         ErrorResponse errorResponse = createErrorResponse(ex, "Ссылка уже добавлена", HttpStatus.BAD_REQUEST);
 

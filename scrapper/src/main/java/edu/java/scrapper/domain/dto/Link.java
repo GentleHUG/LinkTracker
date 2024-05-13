@@ -10,4 +10,14 @@ public record Link(
     Long answerCount,
     Long commitsCount
 ){
+    public static Link createFromJpa(edu.java.scrapper.domain.jpa.entity.Link link) {
+        return new Link(
+            link.getId(),
+            link.getUrl(),
+            link.getAdditionTime(),
+            link.getLastCheckTime(),
+            link.getAnswersCount(),
+            link.getCommitsCount()
+        );
+    }
 }

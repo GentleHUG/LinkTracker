@@ -50,6 +50,6 @@ public class StartCommand implements Command {
                  messageText = response.code();
              }
         }
-        return new SendMessage(update.message().chat().id(), messageText);
+        return new SendMessage(tgChatId, messageText);
     }
 }

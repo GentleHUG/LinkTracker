@@ -1,18 +1,15 @@
 package edu.java.scrapper.service.jdbc;
 
 import edu.java.scrapper.domain.dto.Chat;
-import edu.java.scrapper.domain.jdbc.JdbcChatRepository;
 import edu.java.scrapper.domain.jdbc.JdbcChatRepositoryNew;
 import edu.java.scrapper.exception.ExistChatException;
 import edu.java.scrapper.exception.NotFoundChatException;
-import edu.java.scrapper.service.TgChatService;
-import org.springframework.stereotype.Service;
+import edu.java.scrapper.service.ChatService;
 
-@Service
-public class JdbcTgChatService implements TgChatService {
+public class JdbcChatService implements ChatService {
     JdbcChatRepositoryNew jdbcChatRepository;
 
-    public JdbcTgChatService(JdbcChatRepositoryNew jdbcChatRepository) {
+    public JdbcChatService(JdbcChatRepositoryNew jdbcChatRepository) {
         this.jdbcChatRepository = jdbcChatRepository;
     }
 

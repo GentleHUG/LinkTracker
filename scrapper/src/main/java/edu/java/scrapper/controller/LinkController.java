@@ -5,7 +5,7 @@ import edu.java.scrapper.controller.dto.LinkResponse;
 import edu.java.scrapper.controller.dto.ListLinkResponse;
 import edu.java.scrapper.controller.dto.RemoveLinkRequest;
 import edu.java.scrapper.domain.dto.Link;
-import edu.java.scrapper.exception.ExistsLinkException;
+import edu.java.scrapper.exception.ExistLinkException;
 import edu.java.scrapper.exception.NotFoundChatException;
 import edu.java.scrapper.exception.NotFoundLinkException;
 import edu.java.scrapper.service.LinkService;
@@ -43,7 +43,7 @@ public class LinkController {
     public ResponseEntity<LinkResponse> createLink(
         @RequestHeader("Tg-Chat-Id") Long chatId,
         @RequestBody @Valid AddLinkRequest addLinkRequest
-    ) throws ExistsLinkException, NotFoundChatException {
+    ) throws ExistLinkException, NotFoundChatException {
 
         Link addedLink = linkService.add(chatId, URI.create(addLinkRequest.link()));
         LinkResponse linkResponse = new LinkResponse(addedLink.id(), URI.create(addedLink.url()));

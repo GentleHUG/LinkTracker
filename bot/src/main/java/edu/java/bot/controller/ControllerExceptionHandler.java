@@ -16,8 +16,8 @@ public class ControllerExceptionHandler {
     public ResponseEntity<?> handler(Exception ex) {
         List<String> stacktrace = Arrays.stream(ex.getStackTrace()).map(Object::toString).toList();
         ErrorResponse errorResponse = new ErrorResponse(
-            "Неверный формал url",
             "400",
+            "Неверный формат url",
             ex.getClass().getSimpleName(),
             ex.getMessage(),
             stacktrace

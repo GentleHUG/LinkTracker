@@ -5,15 +5,14 @@ import edu.java.scrapper.domain.dto.Link;
 import edu.java.scrapper.domain.jdbc.JdbcChatRepositoryNew;
 import edu.java.scrapper.domain.jdbc.JdbcLinkRepositoryNew;
 import edu.java.scrapper.exception.NotFoundChatException;
-import edu.java.scrapper.exception.ExistsLinkException;
+import edu.java.scrapper.exception.ExistLinkException;
 import edu.java.scrapper.exception.NotFoundLinkException;
 import edu.java.scrapper.service.LinkService;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.net.URI;
 import java.util.List;
 
-@Service
+
 public class JdbcLinkService implements LinkService {
     JdbcLinkRepositoryNew jdbcLinkRepository;
     JdbcChatRepositoryNew jdbcChatRepository;
@@ -25,7 +24,7 @@ public class JdbcLinkService implements LinkService {
 
     @Transactional
     @Override
-    public Link add(long tgChatId, URI url) throws NotFoundChatException, ExistsLinkException {
+    public Link add(long tgChatId, URI url) throws NotFoundChatException, ExistLinkException {
         Chat chat;
         try {
             chat = jdbcChatRepository.findChatByTgChatId(tgChatId);
@@ -45,7 +44,7 @@ public class JdbcLinkService implements LinkService {
         try {
             jdbcLinkRepository.addLinkIdToChatId(link.id(), chat.id());
         } catch (Exception e) {
-            throw new ExistsLinkException();
+            throw new ExistLinkException();
         }
         return link;
     }

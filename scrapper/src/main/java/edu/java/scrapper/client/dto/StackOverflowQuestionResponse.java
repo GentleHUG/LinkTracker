@@ -20,6 +20,9 @@ public record StackOverflowQuestionResponse(
         @JsonProperty("view_count")
         int viewCount,
 
+        @JsonProperty("answer_count")
+        int answerCount,
+
         int score,
 
         @JsonProperty("creation_date")

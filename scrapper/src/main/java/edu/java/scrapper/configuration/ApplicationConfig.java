@@ -12,12 +12,12 @@ public record ApplicationConfig(
     @Bean
     @NotNull
     Scheduler scheduler,
-    BaseUrls urls
+    BaseUrls urls,
+    AccessType databaseAccessType
 ) {
     public record Scheduler(boolean enable, @NotNull Duration interval, @NotNull Duration forceCheckDelay) {
     }
 
     public record BaseUrls(String gitHubBaseUrl, String stackOverflowBaseUrl) {
-
     }
 }

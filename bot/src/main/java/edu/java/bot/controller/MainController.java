@@ -2,6 +2,7 @@ package edu.java.bot.controller;
 
 import com.pengrad.telegrambot.request.SendMessage;
 import edu.java.bot.controller.dto.UpdateRequest;
+import edu.java.bot.service.UpdateService;
 import edu.java.bot.telegram.Bot;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -14,23 +15,15 @@ import java.util.List;
 @RestController
 public class MainController {
 
-    private final Bot botImplementation;
+    private final UpdateService updateService;
 
-    public MainController(Bot botImplementation) {
-        this.botImplementation = botImplementation;
+    public MainController(UpdateService updateService) {
+        this.updateService = updateService;
     }
 
     @PostMapping("/updates")
     public ResponseEntity<?> updates(@RequestBody @Valid UpdateRequest updateRequest) {
-        List<Long> tgChatIds = updateRequest.tgChatIds();
-        for (Long chatId : tgChatIds) {
-            String text = "Обновление по ссылке: "
-                + updateRequest.url()
-                + "\nОписание: "
-                + updateRequest.description();
-            SendMessage message = new SendMessage(chatId, text);
-            botImplementation.execute(message);
-        }
+        updateService.handle(updateRequest);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -7,7 +7,7 @@ app:
   urls:
     gitHubBaseUrl: https://api.github.com/
     stackOverflowBaseUrl: https://api.stackexchange.com/
-
+  database-access-type: jdbc
 
 bot:
   api:
@@ -22,7 +22,7 @@ spring:
     password: postgres
     driver-class-name: org.postgresql.Driver
   liquibase:
-    enabled: true
+    enabled: false
 
 server:
   port: 8080
