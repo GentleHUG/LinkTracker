@@ -1,7 +1,7 @@
-package edu.java.bot.configuration;
+package edu.java.scrapper.configuration;
 
-import edu.java.bot.client.RetryableScrapperClient;
-import edu.java.bot.client.ScrapperClient;
+import edu.java.scrapper.client.BotClient;
+import edu.java.scrapper.client.RetryableBotClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,19 +19,17 @@ public class ClientConfiguration {
 
     @Autowired
     private ApplicationConfig applicationConfig;
-
-    @Value("${scrapper.api.baseurl}")
+    @Value("${bot.api.baseurl}")
     private String baseUrl;
 
-
     @Bean
-    public ScrapperClient scrapperClient(RetryTemplate retryTemplate) {
+    public BotClient botClient(RetryTemplate retryTemplate) {
         RestClient restClient = RestClient.builder().baseUrl(baseUrl).build();
         RestClientAdapter adapter = RestClientAdapter.create(restClient);
         HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
-        ScrapperClient client = factory.createClient(ScrapperClient.class);
 
-        return new RetryableScrapperClient(retryTemplate, client);
+        BotClient client = factory.createClient(BotClient.class);
+        return new RetryableBotClient(retryTemplate, client);
     }
 
     @Bean

@@ -42,6 +42,7 @@ public class ListCommand implements Command{
             if (response.size() == 0) {
                 messageText.append(EMPTY_LIST);
             } else {
+                messageText.append("Список отслеживаемых ссылок:\n");
                 for (int i = 0; i < response.size(); i++) {
                     messageText.append(i + 1).append(") ").append(response.links().get(i).link()).append("\n");
                 }
