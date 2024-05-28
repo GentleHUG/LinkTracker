@@ -5,6 +5,7 @@ import edu.java.scrapper.exception.ExistLinkException;
 import edu.java.scrapper.exception.ExistChatException;
 import edu.java.scrapper.exception.NotFoundChatException;
 import edu.java.scrapper.exception.NotFoundLinkException;
+import edu.java.scrapper.exception.RateLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -49,6 +50,12 @@ public class ControllerExceptionHandler {
         ErrorResponse errorResponse = createErrorResponse(ex, "Чат с таким ID не найден", HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> rateLimitExceededHandler(Exception ex) {
+        ErrorResponse errorResponse = createErrorResponse(ex, "Слишком много запрососов", HttpStatus.TOO_MANY_REQUESTS);
+        return new ResponseEntity<>(errorResponse, HttpStatus.TOO_MANY_REQUESTS);
     }
 
     private ErrorResponse createErrorResponse(Exception ex, String message, HttpStatus httpStatus) {
