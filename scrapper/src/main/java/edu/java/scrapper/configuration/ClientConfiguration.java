@@ -12,7 +12,12 @@ import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import reactor.util.retry.Retry;
+import java.time.Duration;
+import java.util.List;
+import java.util.function.Predicate;
 
 @Configuration
 public class ClientConfiguration {
@@ -48,6 +53,23 @@ public class ClientConfiguration {
             case CONSTANT -> new FixedBackOffPolicy();
             case LINEAR -> new LinearBackOffPolicy();
             case EXPONENTIAL -> new ExponentialBackOffPolicy();
+        };
+    }
+
+    private Predicate<? super Throwable> buildFilter(List<Integer> retryCodes) {
+        return e -> e instanceof WebClientResponseException
+            && retryCodes.contains(((WebClientResponseException) e).getStatusCode().value());
+    }
+
+    @Bean
+    public Retry retryInstance() {
+        return switch (applicationConfig.backOff()) {
+            case CONSTANT -> Retry.fixedDelay(3, Duration.ofMillis(1000L))
+                .filter(buildFilter(applicationConfig.retryCodes()));
+            case LINEAR -> LinearRetry.linearBackoff(3, Duration.ofMillis(1000L))
+                .filter(buildFilter(applicationConfig.retryCodes()));
+            case EXPONENTIAL -> Retry.backoff(3, Duration.ofMillis(1000L))
+                .filter(buildFilter(applicationConfig.retryCodes()));
         };
     }
 }
