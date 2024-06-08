@@ -1,6 +1,5 @@
 package edu.java.scrapper.service;
 
-import edu.java.scrapper.client.BotClient;
 import edu.java.scrapper.client.GitHubClient;
 import edu.java.scrapper.client.StackOverflowClient;
 import edu.java.scrapper.client.dto.GitHubCommitResponse;
@@ -9,6 +8,7 @@ import edu.java.scrapper.client.dto.StackOverflowAnswerResponse;
 import edu.java.scrapper.client.dto.StackOverflowQuestionResponse;
 import edu.java.scrapper.controller.dto.UpdateRequest;
 import edu.java.scrapper.domain.dto.Link;
+import edu.java.scrapper.service.sender.SenderNotification;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,7 +27,7 @@ public class LinkUpdateScheduler {
 
     private final StackOverflowClient stackOverflowClient;
 
-    private final BotClient botClient;
+    private final SenderNotification senderNotification;
 
     @Value("${app.scheduler.force-check-delay}")
     private Long forceCheckDelay;
@@ -36,12 +36,12 @@ public class LinkUpdateScheduler {
         LinkUpdater linkUpdater,
         GitHubClient gitHubClient,
         StackOverflowClient stackOverflowClient,
-        BotClient botClient
+        SenderNotification senderNotification
     ) {
         this.linkUpdater = linkUpdater;
         this.gitHubClient = gitHubClient;
         this.stackOverflowClient = stackOverflowClient;
-        this.botClient = botClient;
+        this.senderNotification = senderNotification;
     }
 
     @Scheduled(fixedDelayString = "#{@scheduler.interval}")
@@ -115,7 +115,7 @@ public class LinkUpdateScheduler {
     }
 
     private void sendBotUpdates(Link link, String description, List<Long> tgChatIds) {
-        botClient.updates(new UpdateRequest(
+        senderNotification.send(new UpdateRequest(
             link.id(),
             link.url(),
             description,

@@ -15,6 +15,9 @@ spring:
     name: bot
   jackson:
     time-zone: UTC
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
 
 server:
   port: 8090
