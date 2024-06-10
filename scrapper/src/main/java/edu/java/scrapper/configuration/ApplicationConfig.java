@@ -2,6 +2,7 @@ package edu.java.scrapper.configuration;
 
 import edu.java.scrapper.enums.AccessType;
 import edu.java.scrapper.enums.BackOffType;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.List;
@@ -21,7 +22,10 @@ public record ApplicationConfig(
     List<Integer> retryCodes,
     String topicName,
     boolean useQueue,
-    String bootstrapServer
+    String bootstrapServer,
+    boolean useGitHubToken,
+    @NotEmpty
+    String gitHubToken
 ) {
     public record Scheduler(boolean enable, @NotNull Duration interval, @NotNull Duration forceCheckDelay) {
     }

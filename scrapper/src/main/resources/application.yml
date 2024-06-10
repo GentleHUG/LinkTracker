@@ -13,6 +13,8 @@ app:
   topic-name: updates
   use-queue: true
   bootstrap-server: localhost:9092
+  use-github-token: true
+  github_token: ${GITHUB_TOKEN}
 
 bot:
   api:

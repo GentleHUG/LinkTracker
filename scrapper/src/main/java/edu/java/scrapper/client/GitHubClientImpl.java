@@ -14,9 +14,17 @@ public class GitHubClientImpl implements GitHubClient {
     private final WebClient webClient;
 
     public GitHubClientImpl(ApplicationConfig applicationConfig) {
-        this.webClient = WebClient.builder()
-            .baseUrl(applicationConfig.urls().gitHubBaseUrl())
-            .build();
+        if (applicationConfig.useGitHubToken()) {
+            this.webClient = WebClient.builder()
+                .baseUrl(applicationConfig.urls().gitHubBaseUrl())
+                .defaultHeaders(h -> h.setBearerAuth(applicationConfig.gitHubToken()))
+                .build();
+        } else {
+            this.webClient = WebClient.builder()
+                .baseUrl(applicationConfig.urls().gitHubBaseUrl())
+                .build();
+        }
+
     }
 
     @Override
